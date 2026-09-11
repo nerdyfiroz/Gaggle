@@ -4,5 +4,8 @@ INSERT INTO settings(setting_group,setting_key,setting_value) VALUES
 ON CONFLICT(setting_group,setting_key) DO NOTHING;
 
 INSERT INTO tasks(title,description,type,url,required,enabled,sort_order) VALUES
-('Follow @itzGaggle on X','Follow the official Gaggle account.','twitter_follow','https://x.com/itzGaggle',true,true,1)
+('Follow @itzGaggle on X','Follow the official Gaggle account.','twitter_follow','https://x.com/itzGaggle',true,true,1),
+('Like the Gaggle post','Like the post linked by the admin.','twitter_like',NULL,false,false,2),
+('Retweet the Gaggle post','Retweet the post linked by the admin.','twitter_retweet',NULL,false,false,3),
+('Reply to the Gaggle post','Reply to the post linked by the admin.','twitter_reply',NULL,false,false,4)
 ON CONFLICT DO NOTHING;

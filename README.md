@@ -89,10 +89,15 @@ Admin:
 - `PATCH /api/applications/status`
 - `GET /api/tasks`
 - `POST /api/tasks`
+- `PATCH /api/tasks`
+- `DELETE /api/tasks?id=...`
+- `PATCH /api/applications/slot`
 - `GET /api/settings`
 - `PUT /api/settings`
 
 Admin UI: `/admin/`
+
+The admin task editor supports Follow, Like, Retweet, Reply, and Custom actions. Each task requires an HTTP(S) link, which appears as a clickable action link on the public application form. The Whitelist settings panel can pause or resume new submissions.
 
 ## Create the first admin
 
