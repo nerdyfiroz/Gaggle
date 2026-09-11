@@ -21,5 +21,8 @@ desktop.ini
 /vendor/
 node_modules/
 
+# Vercel
+.vercel/
+
 # Compiled
 *.cache

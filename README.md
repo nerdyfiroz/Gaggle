@@ -255,3 +255,33 @@ All text content (project name, description, lore, supply, etc.) is configurable
 ## 📄 License
 
 All rights reserved. This project is proprietary.
+
+## Vercel Node/PostgreSQL API
+
+The Vercel migration is API-first and lives in `api/index.js`:
+
+- `POST /api/applications` — submit a whitelist application
+- `GET /api/config` — public settings
+- `GET /api/tasks` — enabled public tasks
+- `GET /api/status?id=WL-XXXXXXXX` — status lookup
+- `POST /api/auth/login` and `POST /api/auth/logout` — admin sessions
+- `GET /api/dashboard` — admin dashboard statistics
+- `GET/PATCH /api/applications` — admin application management
+- `GET/POST /api/tasks` — admin task management
+- `GET/PUT /api/settings` — admin settings
+
+### Vercel setup
+
+1. Create a PostgreSQL database through Neon, Supabase, or another managed provider.
+2. Run `database/schema.postgres.sql`, then `database/seed.postgres.sql`.
+3. Install dependencies with `npm install` and deploy this repository to Vercel.
+4. Configure these Vercel environment variables:
+    - `POSTGRES_URL` or `DATABASE_URL`
+    - `SESSION_SECRET` (a long random value)
+    - `APP_URL`
+    - `CAPTCHA_SITE_KEY`
+    - `CAPTCHA_SECRET_KEY`
+    - `NODE_ENV=production`
+5. Create the first admin using a bcrypt hash in PostgreSQL. Generate a hash with `node -e "console.log(require('bcryptjs').hashSync('replace-this-password', 12))"` and set `force_password_change` to `true`.
+
+The original PHP-rendered pages and `.php` URLs are not executed by Vercel. The frontend must call the JSON API above, or the PHP runtime must remain deployed on Render/cPanel.
