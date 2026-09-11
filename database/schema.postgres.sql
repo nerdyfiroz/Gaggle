@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 CREATE TABLE IF NOT EXISTS applications (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   application_id VARCHAR(20) UNIQUE NOT NULL, wallet_address VARCHAR(255) NOT NULL, wallet_normalized VARCHAR(255) UNIQUE NOT NULL,
-  twitter_username VARCHAR(100), discord_username VARCHAR(100), telegram_username VARCHAR(100), email VARCHAR(255),
+  twitter_username VARCHAR(100), email VARCHAR(255),
   ip_address INET NOT NULL, user_agent TEXT, status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected','blacklisted','review')),
   admin_notes TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS application_tasks (
   task_id BIGINT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE, completed BOOLEAN NOT NULL DEFAULT TRUE, proof VARCHAR(512), created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), UNIQUE(application_id, task_id)
 );
 CREATE TABLE IF NOT EXISTS blacklist (
-  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, type VARCHAR(20) NOT NULL CHECK (type IN ('wallet','ip','twitter','discord')), value VARCHAR(255) NOT NULL, reason TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), UNIQUE(type, value)
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, type VARCHAR(20) NOT NULL CHECK (type IN ('wallet','ip','twitter')), value VARCHAR(255) NOT NULL, reason TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), UNIQUE(type, value)
 );
 CREATE TABLE IF NOT EXISTS blocked_ips (id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, ip_address INET UNIQUE NOT NULL, reason TEXT, blocked_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
 CREATE TABLE IF NOT EXISTS rate_limits (id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, ip_address INET NOT NULL, endpoint VARCHAR(100) NOT NULL DEFAULT 'apply', created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
