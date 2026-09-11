@@ -21,7 +21,8 @@ async function publicRoute(req, res, path, body) {
   if (path === '/config' && req.method === 'GET') {
     const general = await query("SELECT setting_key, setting_value FROM settings WHERE setting_group='general'");
     const application = await query("SELECT setting_key, setting_value FROM settings WHERE setting_group='application'");
-    const values = Object.fromEntries([...general.rows, ...application.rows].map(row => [row.setting_key, row.setting_value]));
+    const captcha = await query("SELECT setting_key, setting_value FROM settings WHERE setting_group='captcha' AND setting_key IN ('captcha_enabled','captcha_provider','captcha_site_key')");
+    const values = Object.fromEntries([...general.rows, ...application.rows, ...captcha.rows].map(row => [row.setting_key, row.setting_value]));
     return json(res, 200, { success: true, settings: values });
   }
   if (path === '/tasks' && req.method === 'GET') {
@@ -69,7 +70,7 @@ async function publicRoute(req, res, path, body) {
 }
 
 async function adminRoute(req,res,path,body) {
-  if (path === '/auth/login' && req.method === 'POST') { const result = await authenticate(clean(body.username), String(body.password||''), nowIp(req)); if (result.error) return json(res,401,{success:false,message:result.error}); issueSession(res,result.admin); await audit({adminId:result.admin.id,username:result.admin.username},req,'login','admin',result.admin.id); return json(res,200,{success:true,admin:{id:result.admin.id,username:result.admin.username,force_password_change:result.admin.force_password_change}}); }
+  if (path === '/auth/login' && req.method === 'POST') { const result = await authenticate(clean(body.username), String(body.password||''), nowIp(req)); if (result.error) return json(res,401,{success:false,message:result.error}); const csrf = issueSession(res,result.admin); await audit({adminId:result.admin.id,username:result.admin.username},req,'login','admin',result.admin.id); return json(res,200,{success:true,csrf,admin:{id:result.admin.id,username:result.admin.username,force_password_change:result.admin.force_password_change}}); }
   if (path === '/auth/logout' && req.method === 'POST') { const session = getSession(req); if (session) await audit(session,req,'logout','admin',session.adminId); clearCookie(res,SESSION_COOKIE); return json(res,200,{success:true}); }
   const session = requireAdmin(req,res); if (!session) return true;
   if (path === '/dashboard' && req.method === 'GET') { const result=await query("SELECT COUNT(*)::int total, COUNT(*) FILTER(WHERE status='pending')::int pending, COUNT(*) FILTER(WHERE status='approved')::int approved, COUNT(*) FILTER(WHERE status='rejected')::int rejected, COUNT(*) FILTER(WHERE created_at::date=CURRENT_DATE)::int today, COUNT(DISTINCT wallet_normalized)::int unique_wallets FROM applications"); return json(res,200,{success:true,stats:result.rows[0]}); }
