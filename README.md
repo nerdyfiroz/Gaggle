@@ -46,6 +46,7 @@ psql "$POSTGRES_URL" -f database/seed.postgres.sql
 
 ```text
 POSTGRES_URL=postgresql://user:password@host/database?sslmode=require
+# Alternatively, Vercel Neon integration variables POSTGRES_PRISMA_URL or DATABASE_URL_UNPOOLED are supported.
 SESSION_SECRET=replace-with-a-long-random-secret
 ADMIN_USERNAME=your-admin-username
 ADMIN_PASSWORD=use-a-unique-password-at-least-12-characters
