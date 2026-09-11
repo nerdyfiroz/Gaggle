@@ -9,6 +9,10 @@ const setting = async (group, key, fallback = null) => { const r = await query('
 const id = () => `WL-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 const normalizeWallet = value => clean(value).toLowerCase();
 const validActionUrl = value => { try { const url = new URL(clean(value)); return ['http:', 'https:'].includes(url.protocol); } catch { return false; } };
+const captchaSecret = () => process.env.SESSION_SECRET || process.env.AUTH_SECRET;
+const signCaptcha = payload => crypto.createHmac('sha256', captchaSecret()).update(payload).digest('base64url');
+const createCaptcha = () => { const left = crypto.randomInt(1, 10); const right = crypto.randomInt(1, 10); const payload = Buffer.from(JSON.stringify({ answer: left + right, exp: Math.floor(Date.now() / 1000) + 60, nonce: crypto.randomBytes(8).toString('hex') })).toString('base64url'); return { question: `${left} + ${right} = ?`, token: `${payload}.${signCaptcha(payload)}` }; };
+const verifyCaptcha = (token, answer) => { try { if (!captchaSecret()) return false; const [payload, signature] = String(token || '').split('.'); const expected = signCaptcha(payload); if (!payload || !signature || signature.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return false; const challenge = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')); return challenge.exp >= Math.floor(Date.now() / 1000) && Number(answer) === challenge.answer; } catch { return false; } };
 const validWallet = async wallet => {
   const chain = String(await setting('general', 'blockchain', 'ethereum')).toLowerCase();
   if (['solana', 'sol'].includes(chain)) return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet);
@@ -19,10 +23,14 @@ const readBody = req => new Promise((resolve, reject) => { let data=''; req.on('
 const audit = (session, req, action, targetType = null, targetId = null, details = null) => query('INSERT INTO admin_logs(admin_id,admin_username,action,target_type,target_id,details,ip_address) VALUES($1,$2,$3,$4,$5,$6,$7)', [session?.adminId, session?.username, action, targetType, targetId == null ? null : String(targetId), details, nowIp(req)]);
 
 async function publicRoute(req, res, path, body) {
+  if (path === '/captcha' && req.method === 'GET') {
+    if (!captchaSecret()) return json(res, 500, { success:false, message:'Captcha is not configured.' });
+    return json(res, 200, { success:true, captcha:createCaptcha() });
+  }
   if (path === '/config' && req.method === 'GET') {
     const general = await query("SELECT setting_key, setting_value FROM settings WHERE setting_group='general'");
     const application = await query("SELECT setting_key, setting_value FROM settings WHERE setting_group='application'");
-    const captcha = await query("SELECT setting_key, setting_value FROM settings WHERE setting_group='captcha' AND setting_key IN ('captcha_enabled','captcha_provider','captcha_site_key')");
+    const captcha = await query("SELECT setting_key, setting_value FROM settings WHERE setting_group='captcha' AND setting_key='captcha_enabled'");
     const values = Object.fromEntries([...general.rows, ...application.rows, ...captcha.rows].map(row => [row.setting_key, row.setting_value]));
     return json(res, 200, { success: true, settings: values });
   }
@@ -54,8 +62,8 @@ async function publicRoute(req, res, path, body) {
     const twitter = clean(body.twitter_username).replace(/^@/, '').toLowerCase();
     if (await setting('application','require_twitter','1') === '1' && !twitter) errors.twitter_username='Twitter/X username is required.';
     if (Object.keys(errors).length) return json(res, 422, { success:false, message:'Please fix the errors below.', errors });
-    const captchaEnabled = await setting('captcha','captcha_enabled','0');
-    if (captchaEnabled === '1') { const token = body.captcha_token || body['cf-turnstile-response'] || body['g-recaptcha-response']; const secret = process.env.CAPTCHA_SECRET_KEY; if (!token || !secret) return json(res, 422, {success:false,message:'CAPTCHA verification failed.',errors:{}}); const endpoint = (await setting('captcha','captcha_provider','turnstile')) === 'recaptcha' ? 'https://www.google.com/recaptcha/api/siteverify' : 'https://challenges.cloudflare.com/turnstile/v0/siteverify'; const response = await fetch(endpoint,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({secret,response:token,remoteip:ip})}); if (!(await response.json()).success) return json(res,422,{success:false,message:'CAPTCHA verification failed.',errors:{}}); }
+    const captchaEnabled = await setting('captcha','captcha_enabled','1');
+    if (captchaEnabled === '1' && !verifyCaptcha(body.captcha_token, body.captcha_answer)) return json(res,422,{success:false,message:'Please solve the math captcha correctly. It expires after one minute.',errors:{captcha:'Captcha answer is incorrect or expired.'}});
     const rateWindow = Number(await setting('application','rate_limit_window_minutes','10')); const rateMax = Number(await setting('application','rate_limit_max_requests','5')); const rate = await query("SELECT COUNT(*)::int count FROM rate_limits WHERE ip_address=$1 AND endpoint='apply' AND created_at >= NOW() - ($2 || ' minutes')::interval", [ip, rateWindow]); if (rate.rows[0].count >= rateMax) return json(res,429,{success:false,message:`Too many submissions. Please wait ${rateWindow} minutes before trying again.`,errors:{}});
     const lifetime = Number(await setting('application','ip_application_limit','100')); const total = await query('SELECT COUNT(*)::int count FROM applications WHERE ip_address=$1',[ip]); if (lifetime > 0 && total.rows[0].count >= lifetime) return json(res,429,{success:false,message:'Maximum application limit reached for this IP address.',errors:{}});
     const blacklist = await query("SELECT type FROM blacklist WHERE (type='wallet' AND value=$1) OR (type='ip' AND value=$2) OR (type='twitter' AND value=$3)",[normalizeWallet(wallet),ip,twitter]); if (blacklist.rowCount) return json(res,403,{success:false,message:'This submission is not eligible.',errors:{}});

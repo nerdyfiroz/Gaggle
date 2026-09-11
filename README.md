@@ -10,7 +10,7 @@ A Node.js/Vercel serverless API and PostgreSQL-backed frontend for the Gaggle NF
 - Signed HttpOnly admin sessions
 - bcrypt password hashing
 - Static HTML/CSS frontend
-- Cloudflare Turnstile or Google reCAPTCHA
+- Built-in one-minute math captcha
 
 ## Project structure
 
@@ -52,8 +52,6 @@ ADMIN_USERNAME=your-admin-username
 ADMIN_PASSWORD=use-a-unique-password-at-least-12-characters
 NODE_ENV=development
 APP_URL=http://localhost:3000
-CAPTCHA_SITE_KEY=your-public-site-key
-CAPTCHA_SECRET_KEY=your-server-secret
 ```
 
 5. Start with Vercel CLI:
@@ -66,7 +64,7 @@ npx vercel dev
 
 1. Import this GitHub repository into Vercel.
 2. Keep the project root as the repository root.
-3. Add `POSTGRES_URL` (your Neon pooled connection string), `SESSION_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `NODE_ENV=production`, `APP_URL`, `CAPTCHA_SITE_KEY`, and `CAPTCHA_SECRET_KEY` in Vercel Project Settings. Add them to Production, Preview, and Development as needed.
+3. Add `POSTGRES_URL` (your Neon pooled connection string), `SESSION_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `NODE_ENV=production`, and `APP_URL` in Vercel Project Settings. Add them to Production, Preview, and Development as needed. No external CAPTCHA keys are needed.
 4. Run `database/schema.postgres.sql` and `database/seed.postgres.sql` against the Neon database. The schema script is safe to re-run and adds the slot columns to an existing installation.
 5. Deploy the `main` branch.
 
@@ -123,6 +121,6 @@ Then open `/admin/` and sign in.
 
 - Never commit `.env` or production secrets.
 - Use a long random `SESSION_SECRET`.
-- Keep CAPTCHA secrets in Vercel server-side environment variables.
+- The built-in math captcha uses `SESSION_SECRET`; no external CAPTCHA secrets are required.
 - Rotate any token that has been exposed in chat, logs, or screenshots.
 - Use a managed PostgreSQL provider with SSL enabled.
