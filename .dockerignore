@@ -1,0 +1,8 @@
+.git
+.env
+storage/logs/*
+node_modules
+vendor
+.gitignore
+README.md
+photo_*.jpg
