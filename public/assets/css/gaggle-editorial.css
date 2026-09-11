@@ -5,3 +5,16 @@ html{background:var(--cream)}body{font-family:'DM Sans',sans-serif;background:va
 .menu-toggle:focus-visible,.navlinks a:focus-visible,.button:focus-visible,.socials a:focus-visible{outline:3px solid var(--crimson);outline-offset:3px}@media(max-width:700px){.hero{padding-top:65px}.hero img{width:min(300px,78vw)}.hero h1{font-size:clamp(4rem,19vw,6rem)}.stats{margin:0 5%;border-radius:16px}.stat{padding:18px 10px}.stat strong{font-size:1.15rem}.split{gap:35px}section{padding:85px 6%}.sectiontitle{font-size:3.4rem}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 @keyframes float{50%{transform:rotate(-2deg) translateY(-14px)}}
+
+/* Use the Collection section's paper canvas as the site's primary background. */
+html,body{background:var(--paper);color:var(--ink)}
+.nav{background:#fffdf7ee}
+.hero,#tasks,#lore{background:var(--paper);color:var(--ink)}
+.hero:before{color:var(--mint)}
+#lore .sectiontitle{color:var(--ink)}
+#lore .muted{color:var(--muted)}
+#lore .eyebrow{color:var(--crimson)}
+.cta{background:var(--paper);border:1px solid var(--line)}
+footer{background:var(--paper);color:var(--ink);border-top:1px solid var(--line)}
+.socials a{color:var(--crimson)}
+.socials a:hover{color:var(--gold)}
