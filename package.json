@@ -8,7 +8,7 @@
     "check": "node --check api/index.js && node --check lib/auth.js && node --check lib/db.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "pg": "^8.13.1"
+    "bcryptjs": "2.4.3",
+    "pg": "8.13.1"
   }
 }
