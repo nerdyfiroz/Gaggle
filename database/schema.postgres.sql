@@ -17,7 +17,9 @@ CREATE TABLE IF NOT EXISTS applications (
   application_id VARCHAR(20) UNIQUE NOT NULL, wallet_address VARCHAR(255) NOT NULL, wallet_normalized VARCHAR(255) UNIQUE NOT NULL,
   twitter_username VARCHAR(100), email VARCHAR(255),
   ip_address INET NOT NULL, user_agent TEXT, status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected','blacklisted','review')),
-  admin_notes TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  admin_notes TEXT, whitelist_slot INTEGER UNIQUE CHECK (whitelist_slot IS NULL OR whitelist_slot > 0),
+  slot_assigned_at TIMESTAMPTZ, slot_assigned_by BIGINT REFERENCES admins(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE TABLE IF NOT EXISTS application_tasks (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, application_id BIGINT NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
@@ -33,3 +35,9 @@ CREATE TABLE IF NOT EXISTS admin_logs (id BIGINT GENERATED ALWAYS AS IDENTITY PR
 CREATE INDEX IF NOT EXISTS idx_applications_ip_created ON applications(ip_address, created_at);
 CREATE INDEX IF NOT EXISTS idx_applications_status_created ON applications(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_rate_limits_endpoint_created ON rate_limits(ip_address, endpoint, created_at);
+
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS whitelist_slot INTEGER;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS slot_assigned_at TIMESTAMPTZ;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS slot_assigned_by BIGINT REFERENCES admins(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_applications_slot ON applications(whitelist_slot) WHERE whitelist_slot IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_applications_whitelist_slot_unique ON applications(whitelist_slot) WHERE whitelist_slot IS NOT NULL;

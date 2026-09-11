@@ -47,6 +47,8 @@ psql "$POSTGRES_URL" -f database/seed.postgres.sql
 ```text
 POSTGRES_URL=postgresql://user:password@host/database?sslmode=require
 SESSION_SECRET=replace-with-a-long-random-secret
+ADMIN_USERNAME=your-admin-username
+ADMIN_PASSWORD=use-a-unique-password-at-least-12-characters
 NODE_ENV=development
 APP_URL=http://localhost:3000
 CAPTCHA_SITE_KEY=your-public-site-key
@@ -63,8 +65,8 @@ npx vercel dev
 
 1. Import this GitHub repository into Vercel.
 2. Keep the project root as the repository root.
-3. Add `POSTGRES_URL`, `SESSION_SECRET`, `NODE_ENV=production`, `APP_URL`, `CAPTCHA_SITE_KEY`, and `CAPTCHA_SECRET_KEY` in Vercel Project Settings.
-4. Run the PostgreSQL schema and seed scripts against the production database.
+3. Add `POSTGRES_URL` (your Neon pooled connection string), `SESSION_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `NODE_ENV=production`, `APP_URL`, `CAPTCHA_SITE_KEY`, and `CAPTCHA_SECRET_KEY` in Vercel Project Settings. Add them to Production, Preview, and Development as needed.
+4. Run `database/schema.postgres.sql` and `database/seed.postgres.sql` against the Neon database. The schema script is safe to re-run and adds the slot columns to an existing installation.
 5. Deploy the `main` branch.
 
 Vercel serves the static frontend from `public/` and the API from `/api/*`.
@@ -93,6 +95,8 @@ Admin:
 Admin UI: `/admin/`
 
 ## Create the first admin
+
+Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` in Vercel. On the first admin login, the API creates that account automatically if the username does not already exist. The password is stored as a bcrypt hash; the plaintext value is never stored. If you prefer SQL provisioning, use the manual method below.
 
 Generate a bcrypt hash locally:
 
