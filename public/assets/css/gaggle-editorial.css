@@ -22,8 +22,6 @@ footer{background:var(--paper);color:var(--ink);border-top:1px solid var(--line)
 *,*::before,*::after{font-family:'Press Start 2P',monospace!important}
 .hero h1,.sectiontitle{line-height:1.35;letter-spacing:-.04em}
 .hero:before{display:none}
-.brand-art{display:block;width:150px;height:42px;border-radius:8px;background:url('/assets/images/logo-banner.jpg') center center/235% auto no-repeat}
-@media(max-width:700px){.brand-art{width:125px;height:36px}}
 .hero h1{font-size:clamp(2.8rem,8vw,6rem)}
 .sectiontitle{font-size:clamp(1.8rem,4vw,3.8rem)}
 @media(max-width:700px){.hero h1{font-size:clamp(2.4rem,12vw,4rem)}.sectiontitle{font-size:clamp(1.7rem,8vw,2.8rem)}}
