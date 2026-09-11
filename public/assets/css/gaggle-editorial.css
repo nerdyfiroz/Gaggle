@@ -1,5 +1,4 @@
-/* Final whitelist theme override: preserve the site palette after the layout layer. */
-#apply{background:var(--paper)!important;color:var(--ink)!important}#apply .eyebrow{color:var(--crimson)!important;font-size:.68rem!important}#apply .sectiontitle{color:var(--ink)!important;font-size:clamp(1.8rem,4vw,3.8rem)!important;letter-spacing:-.08em!important;line-height:1.35!important;text-transform:none!important}#apply>.muted{color:var(--muted)!important}.task-option{border-color:var(--line)!important;background:var(--paper)!important;color:var(--ink)!important;box-shadow:0 8px 25px #18221e0d!important}.task-option:hover{border-color:var(--mint-deep)!important}.task-option strong{font-size:.65rem!important;line-height:1.5!important;letter-spacing:.04em!important}.task-option small{color:var(--muted)!important;font-size:.55rem!important}.task-link{border:0!important;padding:0!important;color:var(--crimson)!important;font-size:.55rem!important;text-transform:none!important;letter-spacing:0!important}.task-link:hover{background:none!important;color:var(--gold)!important}.application-form label{color:var(--ink)!important;font-size:.65rem!important;letter-spacing:.04em!important}.application-form input:not([type=checkbox]){padding:14px!important;border-color:var(--line)!important;background:#fff!important;color:var(--ink)!important;font-size:.65rem!important}.application-form input:not([type=checkbox])::placeholder{color:var(--muted)!important}.application-form input:focus{border-color:var(--crimson)!important;outline:3px solid #a63d4844!important}.math-captcha{border-color:var(--line)!important;background:var(--cream)!important;color:var(--ink)!important}.captcha-question{border-color:var(--crimson)!important;color:var(--crimson)!important;font-size:.65rem!important}.math-captcha input{background:#fff!important;border-color:var(--line)!important;color:var(--ink)!important}.captcha-refresh{border-color:var(--line)!important;background:var(--paper)!important;color:var(--ink)!important;font-size:.55rem!important}.captcha-refresh:hover{background:var(--mint)!important;color:var(--ink)!important}.math-captcha small{color:var(--muted)!important}.application-form>.button{background:var(--crimson)!important;color:var(--paper)!important;box-shadow:0 8px 0 #762731!important;text-transform:none!important;letter-spacing:0!important}.application-form>.button:hover{background:var(--crimson)!important;box-shadow:0 11px 0 #762731!important}
+/* Legacy whitelist theme overrides removed — superseded by .wl-panel styles below */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 /* About section theme */
@@ -32,8 +31,51 @@ footer{background:var(--paper);color:var(--ink);border-top:1px solid var(--line)
 .sectiontitle{font-size:clamp(1.8rem,4vw,3.8rem)}
 @media(max-width:700px){.hero h1{font-size:clamp(2.4rem,12vw,4rem)}.sectiontitle{font-size:clamp(1.7rem,8vw,2.8rem)}}
 
-/* Keep the quest layout while matching the site's original visual theme. */
-#apply{background:var(--paper);color:var(--ink);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}#apply .eyebrow{color:var(--crimson);font-size:.68rem}#apply .sectiontitle{color:var(--ink);font-size:clamp(1.8rem,4vw,3.8rem);letter-spacing:-.08em;line-height:1.35;text-transform:none}#apply>.muted{color:var(--muted)}.task-option{border-color:var(--line);background:var(--paper);color:var(--ink);box-shadow:0 8px 25px #18221e0d}.task-option:hover{border-color:var(--mint-deep)}.task-option strong{font-size:.65rem;line-height:1.5;letter-spacing:.04em}.task-option small{color:var(--muted);font-size:.55rem}.task-link{border:0;padding:0;color:var(--crimson);font-size:.55rem;text-transform:none;letter-spacing:0}.task-link:hover{background:none;color:var(--gold)}.application-form label{color:var(--ink);font-size:.65rem;letter-spacing:.04em}.application-form input:not([type=checkbox]){padding:14px;border-color:var(--line);background:#fff;color:var(--ink);font-size:.65rem}.application-form input:not([type=checkbox])::placeholder{color:var(--muted)}.application-form input:focus{border-color:var(--crimson);outline:3px solid #a63d4844}.math-captcha{border-color:var(--line);background:var(--cream);color:var(--ink)}.captcha-question{border-color:var(--crimson);color:var(--crimson);font-size:.65rem}.math-captcha input{background:#fff!important;border-color:var(--line)!important;color:var(--ink)!important}.captcha-refresh{border-color:var(--line);background:var(--paper);color:var(--ink);font-size:.55rem}.captcha-refresh:hover{background:var(--mint);color:var(--ink)}.math-captcha small{color:var(--muted)}.application-form>.button{background:var(--crimson);color:var(--paper);box-shadow:0 8px 0 #762731;text-transform:none;letter-spacing:0}.application-form>.button:hover{background:var(--crimson);box-shadow:0 11px 0 #762731}
+/* Old quest layout overrides removed — superseded by .wl-panel styles */
 
-/* Screenshot-inspired whitelist quest panel */
-#apply{max-width:none;margin:0;padding:72px max(6%,calc((100vw - 1180px)/2));background:#1e222c;color:#f7f2e6;border-top:1px solid #343b49;border-bottom:1px solid #343b49}#apply .eyebrow{color:#f4c63f;font-size:.72rem}#apply .sectiontitle{color:#f4c63f;text-transform:uppercase;font-size:clamp(2rem,5vw,4.2rem);letter-spacing:.04em;line-height:1.15;margin:12px 0 14px}#apply>.muted{color:#aeb6c8;margin-bottom:30px}#apply .application-form{max-width:none;margin:0}.application-tasks{gap:12px}.task-option{position:relative;display:grid!important;grid-template-columns:28px 1fr!important;align-items:start;gap:14px;padding:20px 18px;border:1px solid #3b4352;border-radius:15px;background:#252a35;color:#f7f2e6;cursor:pointer;box-shadow:0 8px 20px #080a101f}.task-option:hover{border-color:#c99d2d}.task-option input{margin-top:3px;accent-color:#e5b932;width:18px;height:18px}.task-option span{gap:8px}.task-option strong{font-size:.78rem;line-height:1.6;text-transform:uppercase;letter-spacing:.08em}.task-option small{color:#8e98ad;font-size:.56rem;line-height:1.6}.task-link{width:max-content;padding:4px 8px;border:1px solid #b58c20;border-radius:4px;color:#f4c63f;font-size:.54rem;text-decoration:none;text-transform:uppercase;letter-spacing:.04em}.task-link:hover{background:#f4c63f;color:#1e222c}.form-grid{gap:12px;margin:12px 0}.application-form label{color:#f7f2e6;font-size:.68rem;font-weight:700;letter-spacing:.08em}.application-form input:not([type=checkbox]){padding:16px 14px;border:1px solid #3b4352;border-radius:11px;background:#171a22;color:#f7f2e6;font-size:.65rem}.application-form input:not([type=checkbox])::placeholder{color:#69758d}.application-form input:focus{border-color:#d6ad32;outline:2px solid #d6ad3244}.math-captcha{grid-template-columns:auto 1fr auto;gap:10px;margin:18px 0;padding:14px 12px;border:1px solid #3b4352;border-radius:11px;background:#202532;color:#f7f2e6}.captcha-question{padding:9px 10px;border:1px solid #b58c20;border-radius:6px;color:#f4c63f;font-size:.75rem;white-space:nowrap}.math-captcha input{background:#171a22!important;border-color:#3b4352!important;color:#f7f2e6!important}.captcha-refresh{border-color:#69758d;color:#c9d0df;background:transparent;font-size:.55rem}.captcha-refresh:hover{background:#f4c63f;color:#1e222c}.math-captcha small{color:#8e98ad}.application-form>.button{margin-top:4px;border-radius:9px;background:#f4c63f;color:#1e222c;box-shadow:0 4px 0 #a77e16;text-transform:uppercase;letter-spacing:.06em}.application-form>.button:hover{background:#ffd95c;box-shadow:0 6px 0 #a77e16}.form-message{color:#f4c63f}.form-message.error{color:#ff8790}.form-message.success{color:#8ee0a0}@media(max-width:700px){#apply{padding:58px 5%}#apply .sectiontitle{font-size:clamp(2rem,11vw,3rem)}.form-grid{grid-template-columns:1fr}.math-captcha{grid-template-columns:1fr auto}.math-captcha input{grid-column:1/-1;width:100%!important}.math-captcha small{grid-column:1/-1}}
+/* Screenshot-inspired whitelist quest panel — structural layout */
+#apply.wl-panel{position:relative;max-width:none;margin:0;padding:48px max(6%,calc((100vw - 580px)/2));background:#1e222c;color:#f7f2e6;border-top:1px solid #343b49;border-bottom:1px solid #343b49;border-radius:0}
+
+/* Close button */
+.wl-close{position:absolute;top:18px;right:max(6%,calc((100vw - 580px)/2));background:none;border:none;color:#f7f2e6;font-size:1.6rem;cursor:pointer;padding:4px 10px;line-height:1;opacity:.7;transition:opacity .2s}.wl-close:hover{opacity:1}
+
+/* Title & subtitle */
+.wl-title{color:#f7f2e6;text-transform:uppercase;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:.04em;line-height:1.15;margin:0 0 8px}.wl-subtitle{color:#aeb6c8;font-size:.6rem;margin:0 0 28px;line-height:1.6}
+
+/* Quest cards — each task in its own card */
+.application-tasks{display:grid;gap:14px}
+.quest-card{padding:20px 18px;border:1px solid #3b4352;border-radius:15px;background:#252a35;display:flex;flex-direction:column;gap:14px}
+.quest-card-header{display:flex;align-items:flex-start;gap:12px}
+.quest-icon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid #3b4352;border-radius:8px;background:#1e222c;color:#f7f2e6;font-size:.8rem;flex:none}
+.quest-header-text{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.quest-header-text strong{font-size:.72rem;line-height:1.6;text-transform:uppercase;letter-spacing:.06em;color:#f7f2e6}
+.quest-header-text em{font-style:normal;font-size:.5rem;padding:3px 8px;border-radius:4px;background:#f4c63f;color:#1e222c;letter-spacing:.06em;font-weight:800;text-transform:uppercase}
+.quest-header-text em.optional{background:#3b4352;color:#8e98ad}
+
+/* Inputs inside quest cards */
+.quest-card input:not([type=hidden]){width:100%!important;padding:14px!important;border:1px solid #3b4352!important;border-radius:9px!important;background:#171a22!important;color:#f7f2e6!important;font-size:.6rem!important}.quest-card input:not([type=hidden])::placeholder{color:#69758d!important}.quest-card input:focus{border-color:#d6ad32!important;outline:2px solid #d6ad3244!important}
+
+/* Application form overrides for new structure */
+#apply .application-form{max-width:none;margin:0;display:flex;flex-direction:column;gap:14px}
+
+/* Captcha restructured layout */
+.math-captcha{display:flex!important;flex-direction:column;gap:10px;margin:4px 0;padding:16px 14px;border:1px solid #3b4352!important;border-radius:11px;background:#202532!important;color:#f7f2e6!important}
+.captcha-label{display:flex;align-items:center;gap:8px}
+.captcha-label-icon{font-size:.75rem}
+.captcha-label strong{font-size:.6rem;color:#f7f2e6;flex:1;letter-spacing:.02em}
+.captcha-label .captcha-refresh{margin-left:auto;border:none;background:transparent;color:#69758d;font-size:.5rem;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;transition:color .2s}.captcha-label .captcha-refresh:hover{color:#f4c63f}
+.captcha-input-row{display:flex;align-items:center;gap:10px}
+.captcha-question{padding:9px 10px;border:1px solid #b58c20;border-radius:6px;color:#f4c63f;font-size:.68rem;white-space:nowrap;flex:none}
+.captcha-input-row input{flex:1;padding:10px 14px!important;border:1px solid #3b4352!important;border-radius:9px!important;background:#171a22!important;color:#f7f2e6!important;font-size:.6rem!important;width:auto!important}.captcha-input-row input::placeholder{color:#69758d!important}
+
+/* Submit button */
+.wl-submit{width:100%;margin-top:4px;border-radius:9px;background:#f4c63f;color:#1e222c;box-shadow:0 4px 0 #a77e16;text-transform:uppercase;letter-spacing:.06em;border:0;cursor:pointer;padding:15px 25px;font-size:.65rem}.wl-submit:hover{background:#ffd95c;box-shadow:0 6px 0 #a77e16}
+
+/* Form messages */
+.form-message{color:#f4c63f;min-height:0}.form-message:empty{display:none}.form-message.error{color:#ff8790}.form-message.success{color:#8ee0a0}
+
+/* Honeypot */
+.honeypot{position:absolute!important;left:-10000px!important}
+
+@media(max-width:700px){#apply.wl-panel{padding:38px 5%}.wl-close{right:5%}.wl-title{font-size:clamp(1.4rem,8vw,2rem)}.captcha-input-row{flex-direction:column;align-items:stretch}.captcha-input-row input{width:100%}}
+
