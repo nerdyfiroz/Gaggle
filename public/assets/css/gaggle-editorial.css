@@ -35,7 +35,7 @@ footer{background:var(--paper);color:var(--ink);border-top:1px solid var(--line)
 #apply.wl-panel{position:relative;max-width:none;margin:0;padding:48px max(6%,calc((100vw - 580px)/2));background:var(--paper)!important;color:var(--ink)!important;border-top:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0}
 
 /* Close button */
-.wl-close{position:absolute;top:18px;right:max(6%,calc((100vw - 580px)/2));background:none;border:none;color:var(--ink);font-size:1.6rem;cursor:pointer;padding:4px 10px;line-height:1;opacity:.7;transition:opacity .2s}.wl-close:hover{opacity:1}
+
 
 /* Title & subtitle */
 .wl-title{color:var(--ink);text-transform:uppercase;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:.04em;line-height:1.15;margin:0 0 8px}.wl-subtitle{color:var(--muted);font-size:.6rem;margin:0 0 28px;line-height:1.6}
@@ -66,6 +66,6 @@ footer{background:var(--paper);color:var(--ink);border-top:1px solid var(--line)
 /* Honeypot */
 .honeypot{position:absolute!important;left:-10000px!important}
 
-@media(max-width:700px){#apply.wl-panel{padding:38px 5%}.wl-close{right:5%}.wl-title{font-size:clamp(1.4rem,8vw,2rem)}}
+@media(max-width:700px){#apply.wl-panel{padding:38px 5%}.wl-title{font-size:clamp(1.4rem,8vw,2rem)}}
 
 
