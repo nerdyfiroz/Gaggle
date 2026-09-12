@@ -57,16 +57,6 @@ footer{background:var(--paper);color:var(--ink);border-top:1px solid var(--line)
 /* Application form overrides for new structure */
 #apply .application-form{max-width:none;margin:0;display:flex;flex-direction:column;gap:14px}
 
-/* Captcha restructured layout */
-.math-captcha{display:flex!important;flex-direction:column;gap:10px;margin:4px 0;padding:16px 14px;border:1px solid var(--line)!important;border-radius:11px;background:var(--cream)!important;color:var(--ink)!important}
-.captcha-label{display:flex;align-items:center;gap:8px}
-.captcha-label-icon{font-size:.75rem}
-.captcha-label strong{font-size:.6rem;color:var(--ink);flex:1;letter-spacing:.02em}
-.captcha-label .captcha-refresh{margin-left:auto;border:none;background:transparent;color:var(--muted);font-size:.5rem;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;transition:color .2s}.captcha-label .captcha-refresh:hover{color:var(--crimson)}
-.captcha-input-row{display:flex;align-items:center;gap:10px}
-.captcha-question{padding:9px 10px;border:1px solid var(--crimson);border-radius:6px;color:var(--crimson);font-size:.68rem;white-space:nowrap;flex:none;font-weight:800}
-.captcha-input-row input{flex:1;padding:10px 14px!important;border:1px solid var(--line)!important;border-radius:9px!important;background:#fff!important;color:var(--ink)!important;font-size:.6rem!important;width:auto!important}.captcha-input-row input::placeholder{color:var(--muted)!important}
-
 /* Submit button */
 .wl-submit{width:100%;margin-top:4px;border-radius:9px;background:var(--crimson);color:var(--paper);box-shadow:0 8px 0 #762731;text-transform:uppercase;letter-spacing:.06em;border:0;cursor:pointer;padding:15px 25px;font-size:.65rem}.wl-submit:hover{background:var(--crimson);box-shadow:0 11px 0 #762731}
 
@@ -76,5 +66,6 @@ footer{background:var(--paper);color:var(--ink);border-top:1px solid var(--line)
 /* Honeypot */
 .honeypot{position:absolute!important;left:-10000px!important}
 
-@media(max-width:700px){#apply.wl-panel{padding:38px 5%}.wl-close{right:5%}.wl-title{font-size:clamp(1.4rem,8vw,2rem)}.captcha-input-row{flex-direction:column;align-items:stretch}.captcha-input-row input{width:100%!important}}
+@media(max-width:700px){#apply.wl-panel{padding:38px 5%}.wl-close{right:5%}.wl-title{font-size:clamp(1.4rem,8vw,2rem)}}
+
 
