@@ -1,0 +1,8 @@
+{
+  "name": "Gaggle",
+  "description": "Gaggle — a flock of unique PFP NFTs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

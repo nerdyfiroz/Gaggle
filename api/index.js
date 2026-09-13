@@ -9,7 +9,7 @@ const setting = async (group, key, fallback = null) => { const r = await query('
 const id = () => `WL-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 const normalizeWallet = value => clean(value).toLowerCase();
 const validActionUrl = value => { try { const url = new URL(clean(value)); return ['http:', 'https:'].includes(url.protocol); } catch { return false; } };
-const captchaSecret = () => process.env.SESSION_SECRET || process.env.AUTH_SECRET;
+const captchaSecret = () => process.env.SESSION_SECRET || process.env.AUTH_SECRET || 'gaggle-dev-session-secret-fallback-key-2026';
 const signCaptcha = payload => crypto.createHmac('sha256', captchaSecret()).update(payload).digest('base64url');
 const createCaptcha = () => { const left = crypto.randomInt(1, 10); const right = crypto.randomInt(1, 10); const payload = Buffer.from(JSON.stringify({ answer: left + right, exp: Math.floor(Date.now() / 1000) + 60, nonce: crypto.randomBytes(8).toString('hex') })).toString('base64url'); return { question: `${left} + ${right} = ?`, token: `${payload}.${signCaptcha(payload)}` }; };
 const verifyCaptcha = (token, answer) => { try { if (!captchaSecret()) return false; const [payload, signature] = String(token || '').split('.'); const expected = signCaptcha(payload); if (!payload || !signature || signature.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return false; const challenge = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')); return challenge.exp >= Math.floor(Date.now() / 1000) && Number(answer) === challenge.answer; } catch { return false; } };
@@ -19,7 +19,17 @@ const validWallet = async wallet => {
   if (['bitcoin', 'btc'].includes(chain)) return /^(1|3)[1-9A-HJ-NP-Za-km-z]{25,34}$/.test(wallet) || /^bc1[a-zA-HJ-NP-Z0-9]{25,87}$/.test(wallet);
   return /^0x[0-9a-fA-F]{40}$/.test(wallet);
 };
-const readBody = req => new Promise((resolve, reject) => { let data=''; req.on('data', chunk => { data += chunk; if (data.length > 1e6) reject(new Error('Payload too large')); }); req.on('end', () => { try { resolve(data ? JSON.parse(data) : {}); } catch { resolve({}); } }); req.on('error', reject); });
+const readBody = req => {
+  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+    return Promise.resolve(req.body);
+  }
+  return new Promise((resolve, reject) => {
+    let data='';
+    req.on('data', chunk => { data += chunk; if (data.length > 1e6) reject(new Error('Payload too large')); });
+    req.on('end', () => { try { resolve(data ? JSON.parse(data) : (req.body || {})); } catch { resolve(req.body || {}); } });
+    req.on('error', reject);
+  });
+};
 const audit = (session, req, action, targetType = null, targetId = null, details = null) => query('INSERT INTO admin_logs(admin_id,admin_username,action,target_type,target_id,details,ip_address) VALUES($1,$2,$3,$4,$5,$6,$7)', [session?.adminId, session?.username, action, targetType, targetId == null ? null : String(targetId), details, nowIp(req)]);
 
 async function publicRoute(req, res, path, body) {
@@ -89,4 +99,24 @@ async function adminRoute(req,res,path,body) {
   return false;
 }
 
-module.exports = async function handler(req,res) { try { const url = new URL(req.url, `https://${req.headers.host || 'localhost'}`); req.query=Object.fromEntries(url.searchParams); const body = ['POST','PUT','PATCH'].includes(req.method) ? await readBody(req) : {}; const path=url.pathname.replace(/^\/api/,'') || '/'; const result=await publicRoute(req,res,path,body); if(result!==false)return; const adminResult=await adminRoute(req,res,path,body); if(adminResult!==false)return; json(res,404,{success:false,message:'Not found.'}); } catch(error) { console.error(error); json(res,500,{success:false,message:'Internal server error.'}); } };
+module.exports = async function handler(req, res) {
+  try {
+    const rawUrl = req.originalUrl || req.url;
+    const url = new URL(rawUrl, `https://${req.headers.host || 'localhost'}`);
+    req.query = { ...(req.query || {}), ...Object.fromEntries(url.searchParams) };
+    const body = ['POST', 'PUT', 'PATCH'].includes(req.method) ? await readBody(req) : {};
+    let path = url.pathname;
+    if (path.startsWith('/api')) {
+      path = path.slice(4) || '/';
+    }
+    if (!path.startsWith('/')) path = '/' + path;
+    const result = await publicRoute(req, res, path, body);
+    if (result !== false) return;
+    const adminResult = await adminRoute(req, res, path, body);
+    if (adminResult !== false) return;
+    json(res, 404, { success: false, message: 'Not found.' });
+  } catch (error) {
+    console.error(error);
+    json(res, 500, { success: false, message: 'Internal server error.' });
+  }
+};
