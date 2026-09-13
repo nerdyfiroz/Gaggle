@@ -33,8 +33,9 @@
     document.getElementById('year').textContent=new Date().getFullYear();
     const menuToggle=document.querySelector('.menu-toggle');
     const siteMenu=document.getElementById('site-menu');
-    menuToggle?.addEventListener('click',()=>{const open=menuToggle.classList.toggle('is-open');siteMenu.classList.toggle('is-open',open);menuToggle.setAttribute('aria-expanded',String(open));menuToggle.setAttribute('aria-label',open?'Close navigation':'Open navigation')});
-    siteMenu?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{menuToggle?.classList.remove('is-open');siteMenu.classList.remove('is-open');menuToggle?.setAttribute('aria-expanded','false')}));
+    menuToggle?.addEventListener('click',(e)=>{e.stopPropagation();const open=menuToggle.classList.toggle('is-open');siteMenu.classList.toggle('is-open',open);menuToggle.setAttribute('aria-expanded',String(open));menuToggle.setAttribute('aria-label',open?'Close navigation':'Open navigation')});
+    siteMenu?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{menuToggle?.classList.remove('is-open');siteMenu?.classList.remove('is-open');menuToggle?.setAttribute('aria-expanded','false');menuToggle?.setAttribute('aria-label','Open navigation')}));
+    document.addEventListener('click',(e)=>{if(siteMenu?.classList.contains('is-open')&&!siteMenu.contains(e.target)&&!menuToggle?.contains(e.target)){menuToggle?.classList.remove('is-open');siteMenu?.classList.remove('is-open');menuToggle?.setAttribute('aria-expanded','false');menuToggle?.setAttribute('aria-label','Open navigation')}});
     let currentTasks=[];
     fetch('/api/config').then(r=>r.json()).then(({settings:s={}})=>{set('name',s.project_name);if(s.project_tagline&&!s.project_tagline.toLowerCase().includes('flock'))set('tagline',s.project_tagline);set('description',s.project_description);if(s.twitter_url)document.getElementById('x').href=s.twitter_url;const form=document.getElementById('application-form');if(s.applications_enabled==='0'){form.querySelectorAll('input,button').forEach(el=>el.disabled=true);document.getElementById('form-message').textContent='Whitelist submissions are paused right now.'}}).catch(()=>{});
     const htmlEscape=value=>String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
