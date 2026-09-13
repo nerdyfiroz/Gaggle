@@ -1,9 +1,9 @@
 const crypto = require('crypto');
 const { query, transaction } = require('../lib/db');
-const { authenticate, issueSession, getSession, requireAdmin, clearCookie, sendJson, SESSION_COOKIE } = require('../lib/auth');
+const { authenticate, issueSession, getSession, requireAdmin, clearCookie, sendJson, safeIp, SESSION_COOKIE } = require('../lib/auth');
 
 const json = (res, code, body) => sendJson(res, code, body);
-const nowIp = req => String(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket?.remoteAddress || '0.0.0.0').split(',')[0].trim();
+const nowIp = req => safeIp(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket?.remoteAddress);
 const clean = value => typeof value === 'string' ? value.trim() : '';
 const setting = async (group, key, fallback = null) => { const r = await query('SELECT setting_value FROM settings WHERE setting_group=$1 AND setting_key=$2', [group, key]); return r.rows[0]?.setting_value ?? fallback; };
 const id = () => `WL-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
@@ -109,7 +109,11 @@ module.exports = async function handler(req, res) {
     if (path.startsWith('/api')) {
       path = path.slice(4) || '/';
     }
+    if (path.startsWith('/admin/auth')) {
+      path = path.slice(6) || '/';
+    }
     if (!path.startsWith('/')) path = '/' + path;
+    path = path.replace(/\/+$/, '') || '/';
     const result = await publicRoute(req, res, path, body);
     if (result !== false) return;
     const adminResult = await adminRoute(req, res, path, body);
