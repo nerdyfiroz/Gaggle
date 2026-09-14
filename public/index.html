@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Gaggle — a flock of unique PFP NFTs.">
-  <title>Gaggle — The GAGGLE is coming</title>
+  <meta name="description" content="Quackery — a unique PFP collection for a community that moves together.">
+  <title>Quackery — The QUACKERY is coming</title>
   <link rel="icon" type="image/jpeg" href="/assets/images/hero-pfp.jpg">
   <link rel="apple-touch-icon" href="/assets/images/hero-pfp.jpg">
   <link rel="stylesheet" href="/assets/css/landing.css">
@@ -20,31 +20,66 @@
   <link rel="stylesheet" href="/assets/css/gaggle-editorial.css">
 </head>
 <body>
-  <nav class="nav" aria-label="Primary navigation"><a class="brand" href="/" aria-label="Gaggle home"><img class="brand-avatar" src="/assets/images/hero-pfp.jpg" alt="Gaggle"><span>GAGGLE</span></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Open navigation"><span></span><span></span><span></span></button><div class="navlinks" id="site-menu"><a href="#about">About</a><a href="#apply">Whitelist</a></div></nav>
+  <nav class="nav" aria-label="Primary navigation"><a class="brand" href="/" aria-label="Quackery home"><img class="brand-avatar" src="/assets/images/hero-pfp.jpg" alt="Quackery"><span>QUACKERY</span></a><div class="nav-actions"><div class="x-dropdown" id="x-dropdown"><button class="x-switch-btn" id="x-switch-btn" type="button" aria-expanded="false" aria-haspopup="true" aria-controls="x-dropdown-menu" aria-label="Socials menu"><span class="socials-label">Socials</span><span class="x-caret" aria-hidden="true">▾</span></button><div class="x-dropdown-menu" id="x-dropdown-menu" role="menu"><a class="x-dropdown-item" role="menuitem" href="https://x.com/itzquackery" target="_blank" rel="noopener"><span class="x-icon-badge badge-red" aria-hidden="true">X</span><span class="x-item-content"><strong>Quackery</strong><small>@itzquackery</small></span><span class="x-external-arrow" aria-hidden="true">↗</span></a><a class="x-dropdown-item" role="menuitem" href="https://x.com/Hunter_NND" target="_blank" rel="noopener"><span class="x-icon-badge badge-black" aria-hidden="true">X</span><span class="x-item-content"><strong>Hunter_NND</strong><small>@Hunter_NND</small></span><span class="x-external-arrow" aria-hidden="true">↗</span></a></div></div></div></nav>
   <main>
-    <section class="hero"><div><p class="eyebrow" id="tagline">The GAGGLE is coming</p><h1 id="name">Gaggle</h1><p id="description">A unique PFP collection for a community that moves together.</p><div class="buttons"><a class="button" href="#apply">Apply for whitelist</a></div></div></section>
+    <section class="hero"><div><p class="eyebrow" id="tagline">The QUACKERY is coming</p><h1 id="name">Quackery</h1><p id="description">A unique PFP collection for a community that moves together.</p><div class="buttons"><a class="button" href="#apply">Apply for whitelist</a></div></div></section>
     <section class="stats" aria-label="Collection statistics"><div class="stat"><strong id="supply">3500</strong><span>Supply</span></div><div class="stat"><strong id="chain">Robinhood</strong><span>Chain</span></div><div class="stat"><strong id="price">TBA</strong><span>Price</span></div><div class="stat"><strong id="date">TBA</strong><span>Mint Date</span></div></section>
-    <section id="about"><div class="split"><img class="art" src="/assets/images/logo-banner.jpg" alt="Gaggle banner"><div><div class="eyebrow">ABOUT</div><h2 class="sectiontitle">Gaggle is a swarm of ducks. 🦆</h2><p class="muted">Inspired by ducks, their unique personalities, playful nature and the chaos they create when they gather together.</p><p class="muted">Total 3,500 supply of ducks. A flock where every duck has its own character, style and story.</p></div></div></section>
     <section id="apply" class="wl-panel"><h2 class="wl-title">Whitelist quests</h2><p class="wl-subtitle">Complete the quests and enter proof details to reserve your placement.</p><form id="application-form" class="application-form"><div id="form-message" class="form-message" role="alert"></div><div id="application-tasks" class="application-tasks"><p class="muted">Loading tasks…</p></div><div class="quest-card"><div class="quest-card-header"><span class="quest-icon" aria-hidden="true">▣</span><span class="quest-header-text"><strong>Submit EVM wallet address</strong><em>REQUIRED</em></span></div><input name="wallet_address" required placeholder="0x1234961890abcdef1234961890abcdef12349618"></div><input type="text" name="website_url" class="honeypot" tabindex="-1" autocomplete="off"><button class="button wl-submit" type="submit">Submit application</button></form></section>
   </main>
-  <footer><span>© <span id="year"></span> Gaggle</span><div class="socials"><a id="x" href="https://x.com/itzGaggle" target="_blank" rel="noopener">X</a></div></footer>
+  <footer><span>© <span id="year"></span> Quackery</span></footer>
   <script>
     const set=(id,value)=>{const el=document.getElementById(id);if(el&&value)el.textContent=value};
     document.getElementById('year').textContent=new Date().getFullYear();
-    const menuToggle=document.querySelector('.menu-toggle');
-    const siteMenu=document.getElementById('site-menu');
-    menuToggle?.addEventListener('click',(e)=>{e.stopPropagation();const open=menuToggle.classList.toggle('is-open');siteMenu.classList.toggle('is-open',open);menuToggle.setAttribute('aria-expanded',String(open));menuToggle.setAttribute('aria-label',open?'Close navigation':'Open navigation')});
-    siteMenu?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{menuToggle?.classList.remove('is-open');siteMenu?.classList.remove('is-open');menuToggle?.setAttribute('aria-expanded','false');menuToggle?.setAttribute('aria-label','Open navigation')}));
-    document.addEventListener('click',(e)=>{if(siteMenu?.classList.contains('is-open')&&!siteMenu.contains(e.target)&&!menuToggle?.contains(e.target)){menuToggle?.classList.remove('is-open');siteMenu?.classList.remove('is-open');menuToggle?.setAttribute('aria-expanded','false');menuToggle?.setAttribute('aria-label','Open navigation')}});
+
+    // X dropdown switcher
+    const xDropdown=document.getElementById('x-dropdown');
+    const xSwitchBtn=document.getElementById('x-switch-btn');
+    const xMenu=document.getElementById('x-dropdown-menu');
+    const toggleXDropdown=(show)=>{
+      const open=typeof show==='boolean'?show:!xDropdown?.classList.contains('is-open');
+      xDropdown?.classList.toggle('is-open',open);
+      xSwitchBtn?.setAttribute('aria-expanded',String(open));
+    };
+    xSwitchBtn?.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      toggleXDropdown();
+    });
+    xMenu?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{
+      toggleXDropdown(false);
+    }));
+
+    document.addEventListener('click',(e)=>{
+      if(xDropdown?.classList.contains('is-open')&&!xDropdown.contains(e.target)){
+        toggleXDropdown(false);
+      }
+    });
+
+    document.addEventListener('keydown',(e)=>{
+      if(e.key==='Escape'){
+        if(xDropdown?.classList.contains('is-open')) toggleXDropdown(false);
+      }
+    });
+
     let currentTasks=[];
-    fetch('/api/config').then(r=>r.json()).then(({settings:s={}})=>{set('name',s.project_name);if(s.project_tagline&&!s.project_tagline.toLowerCase().includes('flock'))set('tagline',s.project_tagline);set('description',s.project_description);if(s.twitter_url)document.getElementById('x').href=s.twitter_url;const form=document.getElementById('application-form');if(s.applications_enabled==='0'){form.querySelectorAll('input,button').forEach(el=>el.disabled=true);document.getElementById('form-message').textContent='Whitelist submissions are paused right now.'}}).catch(()=>{});
+    fetch('/api/config').then(r=>r.json()).then(({settings:s={}})=>{if(s.project_name)set('name',s.project_name.replace(/Gaggle/gi,'Quackery'));if(s.project_tagline&&!s.project_tagline.toLowerCase().includes('flock'))set('tagline',s.project_tagline.replace(/Gaggle/gi,'Quackery'));if(s.project_description)set('description',s.project_description.replace(/Gaggle/gi,'Quackery'));const xEl=document.getElementById('x');if(xEl&&s.twitter_url)xEl.href=s.twitter_url;const form=document.getElementById('application-form');if(s.applications_enabled==='0'){form.querySelectorAll('input,button').forEach(el=>el.disabled=true);document.getElementById('form-message').textContent='Whitelist submissions are paused right now.'}}).catch(()=>{});
     const htmlEscape=value=>String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const isTweetLinkTask=t=>{const type=String(t.type||'').toLowerCase(),title=String(t.title||'').toLowerCase(),desc=String(t.description||'').toLowerCase();return ['twitter_reply','twitter_like','twitter_retweet'].includes(type)||/(reply|comment|retweet|pinned|post|tweet|like)/i.test(title)||/(reply|comment|retweet|pinned|post|tweet|like)/i.test(desc);};
     const taskAction=t=>({twitter_follow:'Follow',twitter_like:'Like',twitter_retweet:'Retweet',twitter_reply:'Reply'}[t.type]||'Open task');
     const taskIcon=t=>({twitter_follow:'X',twitter_like:'X',twitter_retweet:'X',twitter_reply:'X'}[t.type]||'☷');
     const taskTitle=t=>{let text=htmlEscape(t.title||'');if(/^https?:\/\//i.test(t.url||'')){if(/@([A-Za-z0-9_]+)/.test(t.title||'')){text=text.replace(/@([A-Za-z0-9_]+)/g,(m,u)=>{const href=(t.url.toLowerCase().includes(u.toLowerCase())||t.type==='twitter_follow')?t.url:`https://x.com/${encodeURIComponent(u)}`;return `<a class="task-link" href="${htmlEscape(href)}" target="_blank" rel="noopener">${m}</a>`});}else{const pm=text.match(/\b(pinned\s+post|post|tweet)\b/i);text=pm?text.replace(pm[0],`<a class="task-link" href="${htmlEscape(t.url)}" target="_blank" rel="noopener">${pm[0]}</a>`):`<a class="task-link" href="${htmlEscape(t.url)}" target="_blank" rel="noopener">${text}</a>`;}}return text;};
-    const taskPlaceholder=t=>({twitter_follow:'@yourusername (or profile link)',twitter_like:'https://x.com/.../status/... (comment link)',twitter_retweet:'https://x.com/.../status/... (retweet link)',twitter_reply:'https://x.com/.../status/... (comment link)'}[t.type]||'Enter proof link or details');
-    fetch('/api/tasks').then(r=>r.json()).then(({tasks=[]})=>{currentTasks=tasks;document.getElementById('application-tasks').innerHTML=tasks.map(t=>`<div class="quest-card"><input type="hidden" name="tasks" value="${Number(t.id)}"><div class="quest-card-header"><span class="quest-icon" aria-hidden="true">${taskIcon(t)}</span><span class="quest-header-text"><strong>${taskTitle(t)}</strong>${t.required?'<em>REQUIRED</em>':'<em class="optional">OPTIONAL</em>'}</span></div><input name="task_proof_${Number(t.id)}" ${t.required?'required':''} placeholder="${htmlEscape(taskPlaceholder(t))}"></div>`).join('')||'<p class="muted">Tasks will be announced soon.</p>'}).catch(()=>{});
-    document.getElementById('application-form').addEventListener('submit',async event=>{event.preventDefault();const form=event.currentTarget,message=document.getElementById('form-message'),selected=[...form.querySelectorAll('input[name="tasks"]')].map(input=>Number(input.value));message.textContent='Submitting…';try{const body=Object.fromEntries(new FormData(form));body.tasks=selected;const response=await fetch('/api/applications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),result=await response.json();if(!response.ok)throw new Error(result.message||'Please check your application.');message.className='form-message success';message.textContent=`Application submitted: ${result.application_id}. Save this reference.`;form.reset()}catch(error){message.className='form-message error';message.textContent=error.message}});
+    const taskPlaceholder=t=>{if(t.type==='twitter_follow')return '@yourusername (or profile link)';if(isTweetLinkTask(t))return 'https://x.com/yourusername/status/... (comment or reply link)';return 'Enter proof link or details';};
+    fetch('/api/tasks').then(r=>r.json()).then(({tasks=[]})=>{currentTasks=tasks;document.getElementById('application-tasks').innerHTML=tasks.map(t=>{const tweetTask=isTweetLinkTask(t);const hint=tweetTask?'<span class="quest-hint">Submit your comment or reply link on the post (https://x.com/.../status/...)</span>':(t.type==='twitter_follow'?'<span class="quest-hint">Enter your X username or profile link</span>':'');return `<div class="quest-card" id="quest-card-${Number(t.id)}"><input type="hidden" name="tasks" value="${Number(t.id)}"><div class="quest-card-header"><span class="quest-icon" aria-hidden="true">${taskIcon(t)}</span><span class="quest-header-text"><strong>${taskTitle(t)}</strong>${t.required?'<em>REQUIRED</em>':'<em class="optional">OPTIONAL</em>'}</span></div>${hint}<input name="task_proof_${Number(t.id)}" id="task_proof_${Number(t.id)}" class="quest-proof-input" ${t.required?'required aria-required="true"':''} placeholder="${htmlEscape(taskPlaceholder(t))}" autocomplete="off" spellcheck="false" data-task-id="${Number(t.id)}" data-task-type="${htmlEscape(t.type||'')}" data-task-title="${htmlEscape(t.title||'')}" data-task-required="${t.required?'true':'false'}" data-task-url="${htmlEscape(t.url||'')}"><div class="quest-field-error" id="error_proof_${Number(t.id)}" style="display:none"></div></div>`;}).join('')||'<p class="muted">Tasks will be announced soon.</p>'}).catch(()=>{});
+    const TWEET_STATUS_REGEX=/^(https?:\/\/)?([a-zA-Z0-9_\-\.]+\.)?(x|twitter)\.com\/([a-zA-Z0-9_]{1,50}|i)\/status\/(\d+)(\S*)?$/i;
+    document.addEventListener('input',e=>{if(e.target&&e.target.classList&&e.target.classList.contains('quest-proof-input')){e.target.classList.remove('input-error');const errEl=document.getElementById(`error_proof_${e.target.getAttribute('data-task-id')}`);if(errEl){errEl.textContent='';errEl.style.display='none';}}});
+    document.getElementById('application-form').addEventListener('submit',async event=>{event.preventDefault();const form=event.currentTarget,message=document.getElementById('form-message');message.textContent='';message.className='form-message';form.querySelectorAll('.input-error').forEach(el=>el.classList.remove('input-error'));form.querySelectorAll('.quest-field-error').forEach(el=>{el.textContent='';el.style.display='none';});
+    const taskInputs=form.querySelectorAll('.quest-proof-input');let firstError=null;
+    for(const input of taskInputs){const val=input.value.trim(),isRequired=input.getAttribute('data-task-required')==='true',taskType=input.getAttribute('data-task-type')||'',taskTitleText=input.getAttribute('data-task-title')||'',taskUrl=input.getAttribute('data-task-url')||'',errEl=document.getElementById(`error_proof_${input.getAttribute('data-task-id')}`);const isTweet=isTweetLinkTask({type:taskType,title:taskTitleText});
+    const fail=msg=>{input.classList.add('input-error');if(errEl){errEl.textContent=msg;errEl.style.display='block';}if(!firstError)firstError=input;};
+    if(isRequired&&!val){fail(isTweet?'Please submit your comment or reply link.':'Please complete this required task proof.');continue;}
+    if(val&&isTweet){if(!TWEET_STATUS_REGEX.test(val)){fail('A valid tweet link is required (comment or reply link, e.g. https://x.com/username/status/1234567890).');continue;}if(taskUrl&&/status\/(\d+)/i.test(taskUrl)){const pId=taskUrl.match(/status\/(\d+)/i)?.[1],sId=val.match(/status\/(\d+)/i)?.[1];if(pId&&sId&&pId===sId){fail('Please submit the link to your own reply or comment, not the pinned post itself.');continue;}}if(!/^https?:\/\//i.test(val)){input.value=`https://${val}`;}}}
+    if(firstError){firstError.focus();message.className='form-message error';message.textContent='Please submit a valid tweet comment or reply link in the required task box.';return;}
+    const walletInput=form.querySelector('input[name="wallet_address"]');if(walletInput&&!walletInput.value.trim()){walletInput.classList.add('input-error');walletInput.focus();message.className='form-message error';message.textContent='Please enter your EVM wallet address.';return;}
+    const selected=[...form.querySelectorAll('input[name="tasks"]')].map(input=>Number(input.value));message.textContent='Submitting…';try{const body=Object.fromEntries(new FormData(form));body.tasks=selected;const response=await fetch('/api/applications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),result=await response.json();if(!response.ok)throw new Error(result.message||'Please check your application.');message.className='form-message success';message.textContent=`Application submitted: ${result.application_id}. Save this reference.`;form.reset()}catch(error){message.className='form-message error';message.textContent=error.message}});
   </script>
 </body>
 </html>

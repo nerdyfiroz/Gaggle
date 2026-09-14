@@ -31,5 +31,5 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, HOST, () => {
-  console.log(`Gaggle application running on http://${HOST}:${PORT}`);
+  console.log(`Quackery application running on http://${HOST}:${PORT}`);
 });

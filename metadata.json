@@ -1,6 +1,6 @@
 {
-  "name": "Gaggle",
-  "description": "Gaggle — a flock of unique PFP NFTs.",
+  "name": "Quackery",
+  "description": "Quackery — a unique PFP collection for a community that moves together.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

@@ -69,15 +69,75 @@ async function publicRoute(req, res, path, body) {
     if (blocked.rowCount) return json(res, 403, { success:false, message:'Your IP address has been blocked from submitting applications.', errors:{} });
     const wallet = clean(body.wallet_address); const errors = {};
     if (!wallet) errors.wallet_address = 'Wallet address is required.'; else if (!(await validWallet(wallet))) errors.wallet_address = 'Please enter a valid wallet address.';
-    const twitter = clean(body.twitter_username).replace(/^@/, '').toLowerCase();
-    if (await setting('application','require_twitter','1') === '1' && !twitter) errors.twitter_username='Twitter/X username is required.';
+    let twitter = clean(body.twitter_username || '').replace(/^@/, '').toLowerCase();
+    if (!twitter) {
+      for (const [k, v] of Object.entries(body)) {
+        if (k.startsWith('task_proof_') || k.startsWith('proof_')) {
+          const val = clean(v || '');
+          const handleMatch = val.match(/^(?:https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/)?@?([a-zA-Z0-9_]{1,25})\/?$/i);
+          if (handleMatch && handleMatch[1] && !['status', 'home', 'explore', 'i'].includes(handleMatch[1].toLowerCase())) {
+            twitter = handleMatch[1].toLowerCase();
+            break;
+          }
+          const statusMatch = val.match(/^(?:https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/)([a-zA-Z0-9_]{1,25})\/status\/\d+/i);
+          if (statusMatch && statusMatch[1] && !['i'].includes(statusMatch[1].toLowerCase())) {
+            twitter = twitter || statusMatch[1].toLowerCase();
+          }
+        }
+      }
+    }
+    if (await setting('application','require_twitter','1') === '1' && !twitter) errors.twitter_username='Twitter/X username or link is required.';
     if (Object.keys(errors).length) return json(res, 422, { success:false, message:'Please fix the errors below.', errors });
     const rateWindow = Number(await setting('application','rate_limit_window_minutes','10')); const rateMax = Number(await setting('application','rate_limit_max_requests','5')); const rate = await query("SELECT COUNT(*)::int count FROM rate_limits WHERE ip_address=$1 AND endpoint='apply' AND created_at >= NOW() - ($2 || ' minutes')::interval", [ip, rateWindow]); if (rate.rows[0].count >= rateMax) return json(res,429,{success:false,message:`Too many submissions. Please wait ${rateWindow} minutes before trying again.`,errors:{}});
     const lifetime = Number(await setting('application','ip_application_limit','100')); const total = await query('SELECT COUNT(*)::int count FROM applications WHERE ip_address=$1',[ip]); if (lifetime > 0 && total.rows[0].count >= lifetime) return json(res,429,{success:false,message:'Maximum application limit reached for this IP address.',errors:{}});
     const blacklist = await query("SELECT type FROM blacklist WHERE (type='wallet' AND value=$1) OR (type='ip' AND value=$2) OR (type='twitter' AND value=$3)",[normalizeWallet(wallet),ip,twitter]); if (blacklist.rowCount) return json(res,403,{success:false,message:'This submission is not eligible.',errors:{}});
     const duplicateWallet = await setting('application','duplicate_wallet_protection','1'); if (duplicateWallet === '1' && (await query('SELECT 1 FROM applications WHERE wallet_normalized=$1',[normalizeWallet(wallet)])).rowCount) return json(res,409,{success:false,message:'This wallet address has already been submitted.',errors:{}});
-    const tasks = [...new Set((Array.isArray(body.tasks) ? body.tasks : []).map(Number).filter(Number.isInteger))]; const taskResult = await query('SELECT id,required FROM tasks WHERE enabled=true'); const allowed = taskResult.rows.map(row=>Number(row.id)); if (tasks.some(task=>!allowed.includes(task)) || taskResult.rows.some(row=>row.required && !tasks.includes(Number(row.id)))) return json(res,422,{success:false,message:'Please complete all required tasks.',errors:{}});
-    try { const application = await transaction(async client => { const appId = id(); const inserted = await client.query('INSERT INTO applications(application_id,wallet_address,wallet_normalized,twitter_username,email,ip_address,user_agent) VALUES($1,$2,$3,$4,NULL,$5,$6) RETURNING id,application_id,created_at,status',[appId,wallet,normalizeWallet(wallet),twitter||null,ip,req.headers['user-agent']||null]); for (const task of tasks) await client.query('INSERT INTO application_tasks(application_id,task_id) VALUES($1,$2)',[inserted.rows[0].id,task]); await client.query("INSERT INTO rate_limits(ip_address,endpoint) VALUES($1,'apply')",[ip]); return inserted.rows[0]; }); return json(res,201,{success:true,message:'Application submitted successfully!',application_id:application.application_id,redirect:`/success?id=${application.application_id}`}); } catch (error) { if (error.code === '23505') return json(res,409,{success:false,message:'This wallet address has already been submitted.',errors:{}}); throw error; }
+    const tasks = [...new Set((Array.isArray(body.tasks) ? body.tasks : []).map(Number).filter(Number.isInteger))];
+    const taskResult = await query('SELECT id,title,description,type,url,required FROM tasks WHERE enabled=true');
+    const allowed = taskResult.rows.map(row=>Number(row.id));
+    if (tasks.some(task=>!allowed.includes(task)) || taskResult.rows.some(row=>row.required && !tasks.includes(Number(row.id)))) return json(res,422,{success:false,message:'Please complete all required tasks.',errors:{}});
+    const taskProofs = {};
+    const tweetStatusRegex = /^(https?:\/\/)?([a-zA-Z0-9_\-\.]+\.)?(x|twitter)\.com\/([a-zA-Z0-9_]{1,50}|i)\/status\/(\d+)/i;
+    for (const taskRow of taskResult.rows) {
+      const taskId = Number(taskRow.id);
+      const isRequired = Boolean(taskRow.required);
+      let proof = clean(body[`task_proof_${taskId}`] || body[`proof_${taskId}`] || (body.task_proofs && body.task_proofs[taskId]) || '');
+      const isTweetTask = ['twitter_reply', 'twitter_like', 'twitter_retweet'].includes(taskRow.type) ||
+                          /(reply|comment|retweet|pinned|post|tweet)/i.test(taskRow.title || '') ||
+                          /(reply|comment|retweet|pinned|post|tweet)/i.test(taskRow.description || '');
+      if (isRequired && !proof) {
+        return json(res, 422, {
+          success: false,
+          message: isTweetTask ? 'Please submit your tweet comment or reply link.' : `Please complete the required task: "${taskRow.title}".`,
+          errors: { [`task_proof_${taskId}`]: 'This task proof is required.' }
+        });
+      }
+      if (proof) {
+        if (isTweetTask) {
+          if (!tweetStatusRegex.test(proof)) {
+            return json(res, 422, {
+              success: false,
+              message: 'Please submit a valid tweet comment or reply link (e.g. https://x.com/username/status/1234567890).',
+              errors: { [`task_proof_${taskId}`]: 'Must be a valid x.com or twitter.com status link.' }
+            });
+          }
+          if (!/^https?:\/\//i.test(proof)) proof = `https://${proof}`;
+          if (taskRow.url && /status\/(\d+)/i.test(taskRow.url)) {
+            const pinnedId = taskRow.url.match(/status\/(\d+)/i)?.[1];
+            const submittedId = proof.match(/status\/(\d+)/i)?.[1];
+            if (pinnedId && submittedId && pinnedId === submittedId) {
+              return json(res, 422, {
+                success: false,
+                message: 'Please submit your own reply or comment link, not the pinned post link.',
+                errors: { [`task_proof_${taskId}`]: 'Must be your own comment or reply link.' }
+              });
+            }
+          }
+        }
+        taskProofs[taskId] = proof;
+      }
+    }
+    try { const application = await transaction(async client => { const appId = id(); const inserted = await client.query('INSERT INTO applications(application_id,wallet_address,wallet_normalized,twitter_username,email,ip_address,user_agent) VALUES($1,$2,$3,$4,NULL,$5,$6) RETURNING id,application_id,created_at,status',[appId,wallet,normalizeWallet(wallet),twitter||null,ip,req.headers['user-agent']||null]); for (const task of tasks) await client.query('INSERT INTO application_tasks(application_id,task_id,proof) VALUES($1,$2,$3)',[inserted.rows[0].id,task,taskProofs[task]||null]); await client.query("INSERT INTO rate_limits(ip_address,endpoint) VALUES($1,'apply')",[ip]); return inserted.rows[0]; }); return json(res,201,{success:true,message:'Application submitted successfully!',application_id:application.application_id,redirect:`/success?id=${application.application_id}`}); } catch (error) { if (error.code === '23505') return json(res,409,{success:false,message:'This wallet address has already been submitted.',errors:{}}); throw error; }
   }
   return false;
 }
