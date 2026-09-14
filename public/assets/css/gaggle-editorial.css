@@ -71,6 +71,7 @@ h1, h2, h3, h4, .brand, .brand span, .hero h1, .sectiontitle, .wl-title, .stat s
 .quest-card{padding:20px 18px;border:1px solid var(--line);border-radius:15px;background:var(--cream);display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 25px #18221e0d}
 .quest-card-header{display:flex;align-items:flex-start;gap:12px}
 .quest-icon{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font-size:1rem;font-family:'Bangers',cursive,sans-serif!important;flex:none}
+.quest-icon svg{width:18px;height:18px;display:block;stroke:currentColor}
 .quest-header-text{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
 .quest-header-text strong{font-size:1.25rem;line-height:1.4;text-transform:uppercase;letter-spacing:.04em;color:var(--ink)}
 .quest-header-text em{font-style:normal;font-size:.9rem;padding:4px 10px;border-radius:6px;background:var(--crimson);color:var(--paper);letter-spacing:.06em;font-weight:400;text-transform:uppercase}
