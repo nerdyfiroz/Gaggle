@@ -18,8 +18,28 @@
   <!-- Load the refined theme after the legacy inline fallback so it owns the cascade. -->
   <link rel="stylesheet" href="/assets/css/landing.css">
   <link rel="stylesheet" href="/assets/css/gaggle-editorial.css">
+  <link rel="stylesheet" href="/assets/css/loader.css">
 </head>
 <body>
+  <!-- Simple & Professional Loading Entrance -->
+  <div id="app-loader" class="app-loader" role="status" aria-live="polite" aria-label="Loading Quackery">
+    <div class="loader-card">
+      <div class="loader-avatar-wrapper">
+        <div class="loader-avatar-ring" aria-hidden="true"></div>
+        <img class="loader-avatar" src="/assets/images/hero-pfp.jpg" alt="Quackery">
+      </div>
+      <h2 class="loader-brand">QUACKERY</h2>
+      <p class="loader-subtitle">A DIGITAL SPECIES</p>
+      <div class="loader-progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div id="loader-progress-bar" class="loader-progress-bar"></div>
+      </div>
+      <div class="loader-status">
+        <span id="loader-status-text" class="loader-status-text">INITIALIZING</span>
+        <span id="loader-status-pct" class="loader-status-pct">0%</span>
+      </div>
+    </div>
+  </div>
+
   <nav class="nav" aria-label="Primary navigation"><a class="brand" href="/" aria-label="Quackery home"><img class="brand-avatar" src="/assets/images/hero-pfp.jpg" alt="Quackery"><span>QUACKERY</span></a><div class="nav-actions"><div class="x-dropdown" id="x-dropdown"><button class="x-switch-btn" id="x-switch-btn" type="button" aria-expanded="false" aria-haspopup="true" aria-controls="x-dropdown-menu" aria-label="Socials menu"><span class="socials-label">Socials</span><span class="x-caret" aria-hidden="true">▾</span></button><div class="x-dropdown-menu" id="x-dropdown-menu" role="menu"><a class="x-dropdown-item" role="menuitem" href="https://x.com/itzquackery" target="_blank" rel="noopener"><span class="x-icon-badge badge-red" aria-hidden="true">X</span><span class="x-item-content"><strong>Quackery</strong><small>@itzquackery</small></span><span class="x-external-arrow" aria-hidden="true">↗</span></a><a class="x-dropdown-item" role="menuitem" href="https://x.com/Hunter_NND" target="_blank" rel="noopener"><span class="x-icon-badge badge-black" aria-hidden="true">X</span><span class="x-item-content"><strong>Hunter_NND</strong><small>@Hunter_NND</small></span><span class="x-external-arrow" aria-hidden="true">↗</span></a></div></div></div></nav>
   <main>
     <section class="hero"><div><h1 id="name">Quackery</h1><p id="description">A unique PFP collection for a community that moves together.</p><div class="buttons"><a class="button" href="#apply">Apply for whitelist</a></div></div></section>
@@ -112,6 +132,8 @@
     if(firstError){firstError.focus();message.className='form-message error';message.textContent='Please submit a valid tweet comment or reply link in the required task box.';return;}
     const walletInput=form.querySelector('input[name="wallet_address"]');if(walletInput&&!walletInput.value.trim()){walletInput.classList.add('input-error');walletInput.focus();message.className='form-message error';message.textContent='Please enter your EVM wallet address.';return;}
     const selected=[...form.querySelectorAll('input[name="tasks"]')].map(input=>Number(input.value));message.textContent='Submitting…';try{const body=Object.fromEntries(new FormData(form));body.tasks=selected;const response=await fetch('/api/applications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),result=await response.json();if(!response.ok)throw new Error(result.message||'Please check your application.');message.className='form-message success';message.textContent=`Application submitted: ${result.application_id}. Save this reference.`;form.reset()}catch(error){message.className='form-message error';message.textContent=error.message}});
-  </script>
+
+    </script>
+  <script src="/assets/js/loader.js"></script>
 </body>
 </html>
