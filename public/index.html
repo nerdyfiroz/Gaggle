@@ -66,17 +66,49 @@
     const isTweetLinkTask=t=>{const type=String(t.type||'').toLowerCase(),title=String(t.title||'').toLowerCase(),desc=String(t.description||'').toLowerCase();return ['twitter_reply','twitter_like','twitter_retweet'].includes(type)||/(reply|comment|retweet|pinned|post|tweet|like)/i.test(title)||/(reply|comment|retweet|pinned|post|tweet|like)/i.test(desc);};
     const taskAction=t=>({twitter_follow:'Follow',twitter_like:'Like',twitter_retweet:'Retweet',twitter_reply:'Reply'}[t.type]||'Open task');
     const taskIcon=t=>({twitter_follow:'X',twitter_like:'X',twitter_retweet:'X',twitter_reply:'X'}[t.type]||'☷');
-    const taskTitle=t=>{let text=htmlEscape(t.title||'');if(/^https?:\/\//i.test(t.url||'')){if(/@([A-Za-z0-9_]+)/.test(t.title||'')){text=text.replace(/@([A-Za-z0-9_]+)/g,(m,u)=>{const href=(t.url.toLowerCase().includes(u.toLowerCase())||t.type==='twitter_follow')?t.url:`https://x.com/${encodeURIComponent(u)}`;return `<a class="task-link" href="${htmlEscape(href)}" target="_blank" rel="noopener">${m}</a>`});}else{const pm=text.match(/\b(pinned\s+post|post|tweet)\b/i);text=pm?text.replace(pm[0],`<a class="task-link" href="${htmlEscape(t.url)}" target="_blank" rel="noopener">${pm[0]}</a>`):`<a class="task-link" href="${htmlEscape(t.url)}" target="_blank" rel="noopener">${text}</a>`;}}return text;};
-    const taskPlaceholder=t=>{if(t.type==='twitter_follow')return '@yourusername (or profile link)';if(isTweetLinkTask(t))return 'https://x.com/yourusername/status/... (comment or reply link)';return 'Enter proof link or details';};
-    fetch('/api/tasks').then(r=>r.json()).then(({tasks=[]})=>{currentTasks=tasks;document.getElementById('application-tasks').innerHTML=tasks.map(t=>{const tweetTask=isTweetLinkTask(t);const hint=tweetTask?'<span class="quest-hint">Submit your comment or reply link on the post (https://x.com/.../status/...)</span>':(t.type==='twitter_follow'?'<span class="quest-hint">Enter your X username or profile link</span>':'');return `<div class="quest-card" id="quest-card-${Number(t.id)}"><input type="hidden" name="tasks" value="${Number(t.id)}"><div class="quest-card-header"><span class="quest-icon" aria-hidden="true">${taskIcon(t)}</span><span class="quest-header-text"><strong>${taskTitle(t)}</strong>${t.required?'<em>REQUIRED</em>':'<em class="optional">OPTIONAL</em>'}</span></div>${hint}<input name="task_proof_${Number(t.id)}" id="task_proof_${Number(t.id)}" class="quest-proof-input" ${t.required?'required aria-required="true"':''} placeholder="${htmlEscape(taskPlaceholder(t))}" autocomplete="off" spellcheck="false" data-task-id="${Number(t.id)}" data-task-type="${htmlEscape(t.type||'')}" data-task-title="${htmlEscape(t.title||'')}" data-task-required="${t.required?'true':'false'}" data-task-url="${htmlEscape(t.url||'')}"><div class="quest-field-error" id="error_proof_${Number(t.id)}" style="display:none"></div></div>`;}).join('')||'<p class="muted">Tasks will be announced soon.</p>'}).catch(()=>{});
+    const parseUrls=str=>String(str||'').split(/[\s,;]+/).map(s=>s.trim()).filter(u=>/^https?:\/\//i.test(u));
+    const taskTitle=t=>{
+      let text=htmlEscape(t.title||'');
+      const urls=parseUrls(t.url);
+      if(/@([A-Za-z0-9_]+)/.test(t.title||'')){
+        text=text.replace(/@([A-Za-z0-9_]+)/g,(m,u)=>{
+          const matchUrl=urls.find(link=>link.toLowerCase().includes(u.toLowerCase()));
+          const href=matchUrl||(urls.length===1?urls[0]:`https://x.com/${encodeURIComponent(u)}`);
+          return `<a class="task-link" href="${htmlEscape(href)}" target="_blank" rel="noopener">${m}</a>`;
+        });
+      }else if(urls.length>0){
+        const pm=text.match(/\b(pinned\s+post|post|tweet)\b/i);
+        text=pm?text.replace(pm[0],`<a class="task-link" href="${htmlEscape(urls[0])}" target="_blank" rel="noopener">${pm[0]}</a>`):`<a class="task-link" href="${htmlEscape(urls[0])}" target="_blank" rel="noopener">${text}</a>`;
+      }
+      return text;
+    };
+    const taskPlaceholder=t=>{if(t.type==='twitter_follow')return '@yourusername or profile links (multiple allowed)';if(isTweetLinkTask(t))return 'https://x.com/.../status/... (reply links, multiple allowed)';return 'Enter proof link or details';};
+    fetch('/api/tasks').then(r=>r.json()).then(({tasks=[]})=>{currentTasks=tasks;document.getElementById('application-tasks').innerHTML=tasks.map(t=>{const tweetTask=isTweetLinkTask(t);const hint=tweetTask?'<span class="quest-hint">Submit your comment or reply link on the post (https://x.com/.../status/...)</span>':(t.type==='twitter_follow'?'<span class="quest-hint">Enter your X username(s) or profile link(s)</span>':'');return `<div class="quest-card" id="quest-card-${Number(t.id)}"><input type="hidden" name="tasks" value="${Number(t.id)}"><div class="quest-card-header"><span class="quest-icon" aria-hidden="true">${taskIcon(t)}</span><span class="quest-header-text"><strong>${taskTitle(t)}</strong>${t.required?'<em>REQUIRED</em>':'<em class="optional">OPTIONAL</em>'}</span></div>${hint}<input name="task_proof_${Number(t.id)}" id="task_proof_${Number(t.id)}" class="quest-proof-input" ${t.required?'required aria-required="true"':''} placeholder="${htmlEscape(taskPlaceholder(t))}" autocomplete="off" spellcheck="false" data-task-id="${Number(t.id)}" data-task-type="${htmlEscape(t.type||'')}" data-task-title="${htmlEscape(t.title||'')}" data-task-required="${t.required?'true':'false'}" data-task-url="${htmlEscape(t.url||'')}"><div class="quest-field-error" id="error_proof_${Number(t.id)}" style="display:none"></div></div>`;}).join('')||'<p class="muted">Tasks will be announced soon.</p>'}).catch(()=>{});
     const TWEET_STATUS_REGEX=/^(https?:\/\/)?([a-zA-Z0-9_\-\.]+\.)?(x|twitter)\.com\/([a-zA-Z0-9_]{1,50}|i)\/status\/(\d+)(\S*)?$/i;
     document.addEventListener('input',e=>{if(e.target&&e.target.classList&&e.target.classList.contains('quest-proof-input')){e.target.classList.remove('input-error');const errEl=document.getElementById(`error_proof_${e.target.getAttribute('data-task-id')}`);if(errEl){errEl.textContent='';errEl.style.display='none';}}});
     document.getElementById('application-form').addEventListener('submit',async event=>{event.preventDefault();const form=event.currentTarget,message=document.getElementById('form-message');message.textContent='';message.className='form-message';form.querySelectorAll('.input-error').forEach(el=>el.classList.remove('input-error'));form.querySelectorAll('.quest-field-error').forEach(el=>{el.textContent='';el.style.display='none';});
     const taskInputs=form.querySelectorAll('.quest-proof-input');let firstError=null;
-    for(const input of taskInputs){const val=input.value.trim(),isRequired=input.getAttribute('data-task-required')==='true',taskType=input.getAttribute('data-task-type')||'',taskTitleText=input.getAttribute('data-task-title')||'',taskUrl=input.getAttribute('data-task-url')||'',errEl=document.getElementById(`error_proof_${input.getAttribute('data-task-id')}`);const isTweet=isTweetLinkTask({type:taskType,title:taskTitleText});
-    const fail=msg=>{input.classList.add('input-error');if(errEl){errEl.textContent=msg;errEl.style.display='block';}if(!firstError)firstError=input;};
-    if(isRequired&&!val){fail(isTweet?'Please submit your comment or reply link.':'Please complete this required task proof.');continue;}
-    if(val&&isTweet){if(!TWEET_STATUS_REGEX.test(val)){fail('A valid tweet link is required (comment or reply link, e.g. https://x.com/username/status/1234567890).');continue;}if(taskUrl&&/status\/(\d+)/i.test(taskUrl)){const pId=taskUrl.match(/status\/(\d+)/i)?.[1],sId=val.match(/status\/(\d+)/i)?.[1];if(pId&&sId&&pId===sId){fail('Please submit the link to your own reply or comment, not the pinned post itself.');continue;}}if(!/^https?:\/\//i.test(val)){input.value=`https://${val}`;}}}
+    for(const input of taskInputs){
+      const val=input.value.trim(),isRequired=input.getAttribute('data-task-required')==='true',taskType=input.getAttribute('data-task-type')||'',taskTitleText=input.getAttribute('data-task-title')||'',taskUrl=input.getAttribute('data-task-url')||'',errEl=document.getElementById(`error_proof_${input.getAttribute('data-task-id')}`);
+      const isTweet=isTweetLinkTask({type:taskType,title:taskTitleText});
+      const fail=msg=>{input.classList.add('input-error');if(errEl){errEl.textContent=msg;errEl.style.display='block';}if(!firstError)firstError=input;};
+      if(isRequired&&!val){fail(isTweet?'Please submit your comment or reply link.':'Please complete this required task proof.');continue;}
+      if(val&&isTweet){
+        const items=val.split(/[\s,;]+/).map(s=>s.trim()).filter(Boolean);
+        const allMatch=items.length>0&&items.every(item=>TWEET_STATUS_REGEX.test(item));
+        if(!allMatch){fail('A valid tweet link is required (comment or reply link, e.g. https://x.com/username/status/1234567890).');continue;}
+        if(taskUrl&&/status\/(\d+)/i.test(taskUrl)){
+          const pinnedIds=[...taskUrl.matchAll(/status\/(\d+)/gi)].map(m=>m[1]);
+          let isPinnedConflict=false;
+          for(const item of items){
+            const sId=item.match(/status\/(\d+)/i)?.[1];
+            if(sId&&pinnedIds.includes(sId)){isPinnedConflict=true;break;}
+          }
+          if(isPinnedConflict){fail('Please submit the link to your own reply or comment, not the pinned post itself.');continue;}
+        }
+        input.value=items.map(i=>/^https?:\/\//i.test(i)?i:`https://${i}`).join(', ');
+      }
+    }
     if(firstError){firstError.focus();message.className='form-message error';message.textContent='Please submit a valid tweet comment or reply link in the required task box.';return;}
     const walletInput=form.querySelector('input[name="wallet_address"]');if(walletInput&&!walletInput.value.trim()){walletInput.classList.add('input-error');walletInput.focus();message.className='form-message error';message.textContent='Please enter your EVM wallet address.';return;}
     const selected=[...form.querySelectorAll('input[name="tasks"]')].map(input=>Number(input.value));message.textContent='Submitting…';try{const body=Object.fromEntries(new FormData(form));body.tasks=selected;const response=await fetch('/api/applications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),result=await response.json();if(!response.ok)throw new Error(result.message||'Please check your application.');message.className='form-message success';message.textContent=`Application submitted: ${result.application_id}. Save this reference.`;form.reset()}catch(error){message.className='form-message error';message.textContent=error.message}});

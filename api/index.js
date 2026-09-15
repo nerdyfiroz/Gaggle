@@ -8,7 +8,40 @@ const clean = value => typeof value === 'string' ? value.trim() : '';
 const setting = async (group, key, fallback = null) => { const r = await query('SELECT setting_value FROM settings WHERE setting_group=$1 AND setting_key=$2', [group, key]); return r.rows[0]?.setting_value ?? fallback; };
 const id = () => `WL-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 const normalizeWallet = value => clean(value).toLowerCase();
-const validActionUrl = value => { try { const url = new URL(clean(value)); return ['http:', 'https:'].includes(url.protocol); } catch { return false; } };
+const validSingleActionUrl = value => { try { const url = new URL(clean(value)); return ['http:', 'https:'].includes(url.protocol); } catch { return false; } };
+const validActionUrl = value => {
+  const parts = String(value || '').split(/[\s,;]+/).map(clean).filter(Boolean);
+  return parts.length > 0 && parts.every(validSingleActionUrl);
+};
+const parseTwitterHandles = input => {
+  if (!input) return [];
+  const text = String(input).trim();
+  if (!text) return [];
+  const found = [];
+  const reserved = new Set(['status', 'home', 'explore', 'i', 'intent', 'hashtag', 'search', 'settings', 'help', 'notifications', 'messages', 'http', 'https', 'x', 'twitter', 'com', 'and', 'or', 'followed', 'both', 'done', 'proof', 'yes']);
+  const urlRegex = /https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/([a-zA-Z0-9_]{1,30})(?:\/status\/\d+)?/gi;
+  let match;
+  while ((match = urlRegex.exec(text)) !== null) {
+    const handle = match[1].replace(/^@/, '').toLowerCase();
+    if (handle && !reserved.has(handle)) found.push(handle);
+  }
+  const withoutUrls = text.replace(/https?:\/\/\S+/gi, ' ');
+  const atRegex = /@([a-zA-Z0-9_]{1,30})/g;
+  while ((match = atRegex.exec(withoutUrls)) !== null) {
+    const handle = match[1].toLowerCase();
+    if (handle && !reserved.has(handle)) found.push(handle);
+  }
+  if (found.length === 0) {
+    const tokens = withoutUrls.split(/[\s,;|/&]+/).map(t => t.trim().replace(/^@/, '')).filter(Boolean);
+    for (const tok of tokens) {
+      const handle = tok.toLowerCase();
+      if (/^[a-zA-Z0-9_]{1,30}$/.test(handle) && !reserved.has(handle) && !/^\d+$/.test(handle)) {
+        found.push(handle);
+      }
+    }
+  }
+  return [...new Set(found)];
+};
 const captchaSecret = () => process.env.SESSION_SECRET || process.env.AUTH_SECRET || 'gaggle-dev-session-secret-fallback-key-2026';
 const signCaptcha = payload => crypto.createHmac('sha256', captchaSecret()).update(payload).digest('base64url');
 const createCaptcha = () => { const left = crypto.randomInt(1, 10); const right = crypto.randomInt(1, 10); const payload = Buffer.from(JSON.stringify({ answer: left + right, exp: Math.floor(Date.now() / 1000) + 60, nonce: crypto.randomBytes(8).toString('hex') })).toString('base64url'); return { question: `${left} + ${right} = ?`, token: `${payload}.${signCaptcha(payload)}` }; };
@@ -69,28 +102,24 @@ async function publicRoute(req, res, path, body) {
     if (blocked.rowCount) return json(res, 403, { success:false, message:'Your IP address has been blocked from submitting applications.', errors:{} });
     const wallet = clean(body.wallet_address); const errors = {};
     if (!wallet) errors.wallet_address = 'Wallet address is required.'; else if (!(await validWallet(wallet))) errors.wallet_address = 'Please enter a valid wallet address.';
-    let twitter = clean(body.twitter_username || '').replace(/^@/, '').toLowerCase();
-    if (!twitter) {
+    let rawTwitterInput = clean(body.twitter_username || '');
+    let handles = parseTwitterHandles(rawTwitterInput);
+    if (handles.length === 0) {
       for (const [k, v] of Object.entries(body)) {
         if (k.startsWith('task_proof_') || k.startsWith('proof_')) {
-          const val = clean(v || '');
-          const handleMatch = val.match(/^(?:https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/)?@?([a-zA-Z0-9_]{1,25})\/?$/i);
-          if (handleMatch && handleMatch[1] && !['status', 'home', 'explore', 'i'].includes(handleMatch[1].toLowerCase())) {
-            twitter = handleMatch[1].toLowerCase();
-            break;
-          }
-          const statusMatch = val.match(/^(?:https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/)([a-zA-Z0-9_]{1,25})\/status\/\d+/i);
-          if (statusMatch && statusMatch[1] && !['i'].includes(statusMatch[1].toLowerCase())) {
-            twitter = twitter || statusMatch[1].toLowerCase();
+          const extracted = parseTwitterHandles(clean(v || ''));
+          if (extracted.length > 0) {
+            handles = [...new Set([...handles, ...extracted])];
           }
         }
       }
     }
+    const twitter = handles.join(', ');
     if (await setting('application','require_twitter','1') === '1' && !twitter) errors.twitter_username='Twitter/X username or link is required.';
     if (Object.keys(errors).length) return json(res, 422, { success:false, message:'Please fix the errors below.', errors });
     const rateWindow = Number(await setting('application','rate_limit_window_minutes','10')); const rateMax = Number(await setting('application','rate_limit_max_requests','5')); const rate = await query("SELECT COUNT(*)::int count FROM rate_limits WHERE ip_address=$1 AND endpoint='apply' AND created_at >= NOW() - ($2 || ' minutes')::interval", [ip, rateWindow]); if (rate.rows[0].count >= rateMax) return json(res,429,{success:false,message:`Too many submissions. Please wait ${rateWindow} minutes before trying again.`,errors:{}});
     const lifetime = Number(await setting('application','ip_application_limit','100')); const total = await query('SELECT COUNT(*)::int count FROM applications WHERE ip_address=$1',[ip]); if (lifetime > 0 && total.rows[0].count >= lifetime) return json(res,429,{success:false,message:'Maximum application limit reached for this IP address.',errors:{}});
-    const blacklist = await query("SELECT type FROM blacklist WHERE (type='wallet' AND value=$1) OR (type='ip' AND value=$2) OR (type='twitter' AND value=$3)",[normalizeWallet(wallet),ip,twitter]); if (blacklist.rowCount) return json(res,403,{success:false,message:'This submission is not eligible.',errors:{}});
+    const blacklistCheck = await query("SELECT type FROM blacklist WHERE (type='wallet' AND value=$1) OR (type='ip' AND value=$2) OR (type='twitter' AND value=ANY($3))",[normalizeWallet(wallet),ip,handles.length?handles:[twitter]]); if (blacklistCheck.rowCount) return json(res,403,{success:false,message:'This submission is not eligible.',errors:{}});
     const duplicateWallet = await setting('application','duplicate_wallet_protection','1'); if (duplicateWallet === '1' && (await query('SELECT 1 FROM applications WHERE wallet_normalized=$1',[normalizeWallet(wallet)])).rowCount) return json(res,409,{success:false,message:'This wallet address has already been submitted.',errors:{}});
     const tasks = [...new Set((Array.isArray(body.tasks) ? body.tasks : []).map(Number).filter(Number.isInteger))];
     const taskResult = await query('SELECT id,title,description,type,url,required FROM tasks WHERE enabled=true');
@@ -114,25 +143,30 @@ async function publicRoute(req, res, path, body) {
       }
       if (proof) {
         if (isTweetTask) {
-          if (!tweetStatusRegex.test(proof)) {
+          const proofItems = proof.split(/[\s,;]+/).map(clean).filter(Boolean);
+          const allValidStatus = proofItems.length > 0 && proofItems.every(item => tweetStatusRegex.test(item));
+          if (!allValidStatus) {
             return json(res, 422, {
               success: false,
               message: 'Please submit a valid tweet comment or reply link (e.g. https://x.com/username/status/1234567890).',
               errors: { [`task_proof_${taskId}`]: 'Must be a valid x.com or twitter.com status link.' }
             });
           }
-          if (!/^https?:\/\//i.test(proof)) proof = `https://${proof}`;
+          const normalizedProofs = proofItems.map(item => /^https?:\/\//i.test(item) ? item : `https://${item}`);
           if (taskRow.url && /status\/(\d+)/i.test(taskRow.url)) {
-            const pinnedId = taskRow.url.match(/status\/(\d+)/i)?.[1];
-            const submittedId = proof.match(/status\/(\d+)/i)?.[1];
-            if (pinnedId && submittedId && pinnedId === submittedId) {
-              return json(res, 422, {
-                success: false,
-                message: 'Please submit your own reply or comment link, not the pinned post link.',
-                errors: { [`task_proof_${taskId}`]: 'Must be your own comment or reply link.' }
-              });
+            const pinnedMatches = [...taskRow.url.matchAll(/status\/(\d+)/gi)].map(m => m[1]);
+            for (const item of normalizedProofs) {
+              const submittedId = item.match(/status\/(\d+)/i)?.[1];
+              if (submittedId && pinnedMatches.includes(submittedId)) {
+                return json(res, 422, {
+                  success: false,
+                  message: 'Please submit your own reply or comment link, not the pinned post link.',
+                  errors: { [`task_proof_${taskId}`]: 'Must be your own comment or reply link.' }
+                });
+              }
             }
           }
+          proof = normalizedProofs.join(', ');
         }
         taskProofs[taskId] = proof;
       }
